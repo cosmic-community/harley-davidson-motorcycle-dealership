@@ -1,32 +1,76 @@
-import { getDealers } from '@/lib/cosmic'
+'use client'
 
-export default async function DealerLocator() {
-  let dealers
+import { useState, useEffect } from 'react'
+import { Dealer } from '@/types'
+
+interface DealerLocatorProps {
+  dealers?: Dealer[]
+}
+
+export default function DealerLocator({ dealers = [] }: DealerLocatorProps) {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredDealers, setFilteredDealers] = useState<Dealer[]>(dealers)
+  const [selectedState, setSelectedState] = useState('')
   
-  try {
-    dealers = await getDealers()
-  } catch (error) {
-    console.error('Error fetching dealers:', error)
+  // Get unique states from dealers
+  const states = Array.from(new Set(
+    dealers
+      .filter(dealer => dealer?.metadata?.state)
+      .map(dealer => dealer.metadata.state)
+  )).sort()
+
+  useEffect(() => {
+    let filtered = dealers
+
+    // Filter by search term (city, name, or address)
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase()
+      filtered = filtered.filter(dealer => {
+        if (!dealer?.metadata) return false
+        
+        const dealerName = dealer.metadata.dealer_name?.toLowerCase() || ''
+        const city = dealer.metadata.city?.toLowerCase() || ''
+        const address = dealer.metadata.address?.toLowerCase() || ''
+        const state = dealer.metadata.state?.toLowerCase() || ''
+        
+        return dealerName.includes(search) || 
+               city.includes(search) || 
+               address.includes(search) ||
+               state.includes(search)
+      })
+    }
+
+    // Filter by selected state
+    if (selectedState) {
+      filtered = filtered.filter(dealer => 
+        dealer?.metadata?.state === selectedState
+      )
+    }
+
+    setFilteredDealers(filtered)
+  }, [searchTerm, selectedState, dealers])
+
+  const formatHours = (hours: Record<string, string> | undefined) => {
+    if (!hours) return null
+
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+    const todayHours = hours[today]
+
+    if (!todayHours) return null
+
     return (
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Find a Dealer</h2>
-            <p className="text-gray-600">Unable to load dealer information at this time.</p>
-          </div>
-        </div>
-      </section>
+      <div className="text-sm text-gray-600">
+        <strong>Today:</strong> {todayHours}
+      </div>
     )
   }
 
   if (!dealers || dealers.length === 0) {
     return (
       <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Find a Dealer</h2>
-            <p className="text-gray-600">No dealers found. Please check back later.</p>
-          </div>
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">Find Your Local Dealer</h2>
+          <p className="text-gray-600">No dealers available at this time.</p>
         </div>
       </section>
     )
@@ -36,88 +80,117 @@ export default async function DealerLocator() {
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Find a Dealer</h2>
+          <h2 className="text-3xl font-bold mb-4">Find Your Local Dealer</h2>
           <p className="text-xl text-gray-600">
-            Visit an authorized Harley-Davidson dealer near you
+            Visit our authorized dealers for sales, service, and genuine parts
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {dealers.map((dealer) => {
-            if (!dealer || !dealer.id) {
-              return null
-            }
-
-            const image = dealer.metadata?.store_image
-            const imageUrl = image?.imgix_url 
-              ? `${image.imgix_url}?w=600&h=400&fit=crop&auto=format,compress`
-              : '/placeholder-dealer.jpg'
-
-            const hours = dealer.metadata?.hours
-
-            return (
-              <div key={dealer.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="aspect-video overflow-hidden">
-                  <img
-                    src={imageUrl}
-                    alt={dealer.metadata?.dealer_name || dealer.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="font-bold text-xl mb-3">
-                    {dealer.metadata?.dealer_name || dealer.title}
-                  </h3>
-                  
-                  <div className="space-y-2 text-gray-600 mb-4">
-                    <p>{dealer.metadata?.address}</p>
-                    <p>
-                      {dealer.metadata?.city && dealer.metadata?.state && dealer.metadata?.zip_code && (
-                        `${dealer.metadata.city}, ${dealer.metadata.state} ${dealer.metadata.zip_code}`
-                      )}
-                    </p>
-                    {dealer.metadata?.phone_number && (
-                      <p className="font-medium">{dealer.metadata.phone_number}</p>
-                    )}
-                  </div>
-
-                  {hours && Object.keys(hours).length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-sm text-gray-800 mb-2">Hours:</h4>
-                      <div className="text-sm text-gray-600">
-                        <p className="capitalize">
-                          Today: {hours[new Date().toLocaleLowerCase().substring(0, 3)] || 'Closed'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    {dealer.metadata?.phone_number && (
-                      <a
-                        href={`tel:${dealer.metadata.phone_number}`}
-                        className="bg-harley-orange text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors text-center"
-                      >
-                        Call Now
-                      </a>
-                    )}
-                    {dealer.metadata?.website && (
-                      <a
-                        href={`https://${dealer.metadata.website}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="border border-harley-orange text-harley-orange px-4 py-2 rounded-lg text-sm font-medium hover:bg-harley-orange hover:text-white transition-colors text-center"
-                      >
-                        Visit Website
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+        {/* Search and Filter Controls */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <input
+                type="text"
+                placeholder="Search by city, dealer name, or address..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-harley-orange focus:border-transparent"
+              />
+            </div>
+            <div>
+              <select
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-harley-orange focus:border-transparent"
+              >
+                <option value="">All States</option>
+                {states.map(state => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
+
+        {/* Results */}
+        {filteredDealers.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600">
+              No dealers found matching your criteria. Try adjusting your search.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDealers.map((dealer) => {
+              if (!dealer?.id || !dealer.metadata) {
+                return null
+              }
+
+              const storeImage = dealer.metadata.store_image
+              const imageUrl = storeImage?.imgix_url 
+                ? `${storeImage.imgix_url}?w=600&h=400&fit=crop&auto=format,compress`
+                : '/placeholder-dealer.jpg'
+
+              return (
+                <div key={dealer.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={imageUrl}
+                      alt={dealer.metadata.dealer_name || dealer.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-bold text-lg mb-2">
+                      {dealer.metadata.dealer_name || dealer.title}
+                    </h3>
+                    
+                    <div className="text-gray-600 mb-3">
+                      {dealer.metadata.address && (
+                        <p>{dealer.metadata.address}</p>
+                      )}
+                      {dealer.metadata.city && dealer.metadata.state && dealer.metadata.zip_code && (
+                        <p>
+                          {dealer.metadata.city}, {dealer.metadata.state} {dealer.metadata.zip_code}
+                        </p>
+                      )}
+                    </div>
+
+                    {dealer.metadata.phone_number && (
+                      <div className="mb-2">
+                        <a
+                          href={`tel:${dealer.metadata.phone_number}`}
+                          className="text-harley-orange hover:underline font-medium"
+                        >
+                          {dealer.metadata.phone_number}
+                        </a>
+                      </div>
+                    )}
+
+                    {dealer.metadata.website && (
+                      <div className="mb-3">
+                        <a
+                          href={dealer.metadata.website.startsWith('http') 
+                            ? dealer.metadata.website 
+                            : `https://${dealer.metadata.website}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-harley-orange hover:underline text-sm"
+                        >
+                          Visit Website →
+                        </a>
+                      </div>
+                    )}
+
+                    {formatHours(dealer.metadata.hours)}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )

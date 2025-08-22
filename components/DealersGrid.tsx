@@ -1,19 +1,10 @@
-import { getDealers } from '@/lib/cosmic'
+import { Dealer } from '@/types'
 
-export default async function DealersGrid() {
-  let dealers
-  
-  try {
-    dealers = await getDealers()
-  } catch (error) {
-    console.error('Error fetching dealers:', error)
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Unable to load dealers at this time.</p>
-      </div>
-    )
-  }
+interface DealersGridProps {
+  dealers: Dealer[]
+}
 
+export default function DealersGrid({ dealers }: DealersGridProps) {
   if (!dealers || dealers.length === 0) {
     return (
       <div className="text-center py-12">
@@ -29,12 +20,14 @@ export default async function DealersGrid() {
           return null
         }
 
-        const image = dealer.metadata?.store_image
-        const imageUrl = image?.imgix_url 
-          ? `${image.imgix_url}?w=600&h=400&fit=crop&auto=format,compress`
+        const storeImage = dealer.metadata?.store_image
+        const imageUrl = storeImage?.imgix_url 
+          ? `${storeImage.imgix_url}?w=800&h=600&fit=crop&auto=format,compress`
           : '/placeholder-dealer.jpg'
 
         const hours = dealer.metadata?.hours
+        const todayKey = new Date().toLocaleLowerCase('en-US', { weekday: 'long' })
+        const todayHours = hours?.[todayKey]
 
         return (
           <div key={dealer.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -47,56 +40,69 @@ export default async function DealersGrid() {
               />
             </div>
             <div className="p-6">
-              <h3 className="font-bold text-xl mb-3">
+              <h3 className="font-bold text-xl mb-2">
                 {dealer.metadata?.dealer_name || dealer.title}
               </h3>
               
-              <div className="space-y-2 text-gray-600 mb-4">
-                <p>{dealer.metadata?.address}</p>
-                <p>
-                  {dealer.metadata?.city && dealer.metadata?.state && dealer.metadata?.zip_code && (
-                    `${dealer.metadata.city}, ${dealer.metadata.state} ${dealer.metadata.zip_code}`
-                  )}
-                </p>
-                {dealer.metadata?.phone_number && (
-                  <p className="font-medium">{dealer.metadata.phone_number}</p>
+              <div className="text-gray-600 mb-4">
+                {dealer.metadata?.address && (
+                  <p>{dealer.metadata.address}</p>
+                )}
+                {dealer.metadata?.city && dealer.metadata?.state && dealer.metadata?.zip_code && (
+                  <p>
+                    {dealer.metadata.city}, {dealer.metadata.state} {dealer.metadata.zip_code}
+                  </p>
                 )}
               </div>
 
-              {hours && Object.keys(hours).length > 0 && (
-                <div className="mb-4">
-                  <h4 className="font-semibold text-sm text-gray-800 mb-2">Hours:</h4>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    {Object.entries(hours).map(([day, time]) => (
-                      <div key={day} className="flex justify-between">
-                        <span className="capitalize">{day}:</span>
-                        <span>{time as string}</span>
-                      </div>
-                    ))}
-                  </div>
+              {dealer.metadata?.phone_number && (
+                <div className="mb-3">
+                  <strong className="text-harley-orange">Phone:</strong>{' '}
+                  <a
+                    href={`tel:${dealer.metadata.phone_number}`}
+                    className="hover:text-harley-orange"
+                  >
+                    {dealer.metadata.phone_number}
+                  </a>
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-2">
-                {dealer.metadata?.phone_number && (
+              {dealer.metadata?.website && (
+                <div className="mb-4">
                   <a
-                    href={`tel:${dealer.metadata.phone_number}`}
-                    className="bg-harley-orange text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors text-center"
-                  >
-                    Call Now
-                  </a>
-                )}
-                {dealer.metadata?.website && (
-                  <a
-                    href={`https://${dealer.metadata.website}`}
+                    href={dealer.metadata.website.startsWith('http') 
+                      ? dealer.metadata.website 
+                      : `https://${dealer.metadata.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="border border-harley-orange text-harley-orange px-4 py-2 rounded-lg text-sm font-medium hover:bg-harley-orange hover:text-white transition-colors text-center"
+                    className="text-harley-orange hover:underline"
                   >
                     Visit Website
                   </a>
-                )}
-              </div>
+                </div>
+              )}
+
+              {todayHours && (
+                <div className="text-sm text-gray-600">
+                  <strong>Today:</strong> {todayHours}
+                </div>
+              )}
+
+              {hours && (
+                <details className="mt-3">
+                  <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-800">
+                    View All Hours
+                  </summary>
+                  <div className="mt-2 text-sm text-gray-600 space-y-1">
+                    {Object.entries(hours).map(([day, time]) => (
+                      <div key={day} className="flex justify-between">
+                        <span className="capitalize">{day}:</span>
+                        <span>{time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
           </div>
         )
