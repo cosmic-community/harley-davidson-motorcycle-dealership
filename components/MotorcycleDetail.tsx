@@ -27,10 +27,10 @@ export default function MotorcycleDetail({ motorcycle }: MotorcycleDetailProps) 
         )}
         
         <div className="absolute inset-0 flex items-end">
-          <div className="container-max w-full pb-12">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full pb-12">
             <div className="text-white">
               <div className="mb-4">
-                <span className="bg-harley-orange px-3 py-1 rounded-full text-sm font-bold">
+                <span className="bg-orange-500 px-3 py-1 rounded-full text-sm font-bold">
                   {motorcycle.metadata.category?.value}
                 </span>
               </div>
@@ -46,14 +46,14 @@ export default function MotorcycleDetail({ motorcycle }: MotorcycleDetailProps) 
       </div>
 
       {/* Content */}
-      <div className="section-padding">
-        <div className="container-max">
+      <div className="py-16">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Description & Features */}
             <div>
               {motorcycle.metadata.description && (
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold text-harley-black mb-4">Overview</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Overview</h2>
                   <p className="text-gray-600 text-lg leading-relaxed">
                     {motorcycle.metadata.description}
                   </p>
@@ -62,7 +62,7 @@ export default function MotorcycleDetail({ motorcycle }: MotorcycleDetailProps) 
 
               {features && (
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold text-harley-black mb-4">Key Features</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Key Features</h2>
                   <div 
                     className="text-gray-600 prose prose-lg"
                     dangerouslySetInnerHTML={{ __html: features }}
@@ -71,10 +71,10 @@ export default function MotorcycleDetail({ motorcycle }: MotorcycleDetailProps) 
               )}
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/dealers" className="btn-harley">
+                <Link href="/dealers" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-bold text-center transition-colors">
                   Find a Dealer
                 </Link>
-                <button className="btn-harley-outline">
+                <button className="border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white px-8 py-3 rounded-lg font-bold transition-colors">
                   Request Quote
                 </button>
               </div>
@@ -83,12 +83,12 @@ export default function MotorcycleDetail({ motorcycle }: MotorcycleDetailProps) 
             {/* Specifications */}
             {specifications && Object.keys(specifications).length > 0 && (
               <div>
-                <h2 className="text-3xl font-bold text-harley-black mb-6">Specifications</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">Specifications</h2>
                 <div className="bg-gray-50 rounded-lg p-6">
                   <dl className="space-y-4">
                     {Object.entries(specifications).map(([key, value]) => (
                       <div key={key} className="flex justify-between py-2 border-b border-gray-200 last:border-b-0">
-                        <dt className="font-semibold text-harley-black capitalize">
+                        <dt className="font-semibold text-gray-900 capitalize">
                           {key.replace(/_/g, ' ')}:
                         </dt>
                         <dd className="text-gray-600">{value as string}</dd>
@@ -103,7 +103,7 @@ export default function MotorcycleDetail({ motorcycle }: MotorcycleDetailProps) 
           {/* Gallery */}
           {galleryImages && galleryImages.length > 0 && (
             <div className="mt-16">
-              <h2 className="text-3xl font-bold text-harley-black mb-8">Gallery</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Gallery</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {galleryImages.map((image, index) => (
                   <div key={index} className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
