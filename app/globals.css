@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --harley-orange: #FF6B00;
+    --harley-black: #1A1A1A;
+    --harley-gray: #2D2D2D;
+    --harley-light: #F5F5F5;
+  }
+}
+
+@layer components {
+  .btn-harley {
+    @apply bg-harley-orange text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors;
+  }
+  
+  .btn-harley-outline {
+    @apply border-2 border-harley-orange text-harley-orange px-6 py-3 rounded-lg font-bold hover:bg-harley-orange hover:text-white transition-colors;
+  }
+  
+  .section-padding {
+    @apply py-16 px-4 sm:px-6 lg:px-8;
+  }
+  
+  .container-max {
+    @apply max-w-7xl mx-auto;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
