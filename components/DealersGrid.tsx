@@ -1,10 +1,19 @@
-import { Dealer } from '@/types'
+import { getDealers } from '@/lib/cosmic'
 
-interface DealersGridProps {
-  dealers: Dealer[]
-}
+export default async function DealersGrid() {
+  let dealers
+  
+  try {
+    dealers = await getDealers()
+  } catch (error) {
+    console.error('Error fetching dealers:', error)
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">Unable to load dealers at this time.</p>
+      </div>
+    )
+  }
 
-export default function DealersGrid({ dealers }: DealersGridProps) {
   if (!dealers || dealers.length === 0) {
     return (
       <div className="text-center py-12">
@@ -14,7 +23,7 @@ export default function DealersGrid({ dealers }: DealersGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {dealers.map((dealer) => {
         if (!dealer || !dealer.id) {
           return null
@@ -22,13 +31,13 @@ export default function DealersGrid({ dealers }: DealersGridProps) {
 
         const image = dealer.metadata?.store_image
         const imageUrl = image?.imgix_url 
-          ? `${image.imgix_url}?w=800&h=400&fit=crop&auto=format,compress`
+          ? `${image.imgix_url}?w=600&h=400&fit=crop&auto=format,compress`
           : '/placeholder-dealer.jpg'
 
         const hours = dealer.metadata?.hours
 
         return (
-          <div key={dealer.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+          <div key={dealer.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="aspect-video overflow-hidden">
               <img
                 src={imageUrl}
@@ -42,45 +51,22 @@ export default function DealersGrid({ dealers }: DealersGridProps) {
                 {dealer.metadata?.dealer_name || dealer.title}
               </h3>
               
-              <div className="space-y-2 mb-4">
-                {dealer.metadata?.address && (
-                  <div className="flex items-start">
-                    <span className="text-gray-600 text-sm">
-                      📍 {dealer.metadata.address}
-                      {dealer.metadata.city && dealer.metadata.state && (
-                        <br />
-                        {dealer.metadata.city}, {dealer.metadata.state} {dealer.metadata.zip_code}
-                      )}
-                    </span>
-                  </div>
-                )}
-                
+              <div className="space-y-2 text-gray-600 mb-4">
+                <p>{dealer.metadata?.address}</p>
+                <p>
+                  {dealer.metadata?.city && dealer.metadata?.state && dealer.metadata?.zip_code && (
+                    `${dealer.metadata.city}, ${dealer.metadata.state} ${dealer.metadata.zip_code}`
+                  )}
+                </p>
                 {dealer.metadata?.phone_number && (
-                  <div className="flex items-center">
-                    <span className="text-gray-600 text-sm">
-                      📞 {dealer.metadata.phone_number}
-                    </span>
-                  </div>
-                )}
-                
-                {dealer.metadata?.website && (
-                  <div className="flex items-center">
-                    <a 
-                      href={`https://${dealer.metadata.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-orange-600 text-sm hover:underline"
-                    >
-                      🌐 {dealer.metadata.website}
-                    </a>
-                  </div>
+                  <p className="font-medium">{dealer.metadata.phone_number}</p>
                 )}
               </div>
 
               {hours && Object.keys(hours).length > 0 && (
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-2">Hours</h4>
-                  <div className="text-sm text-gray-600">
+                <div className="mb-4">
+                  <h4 className="font-semibold text-sm text-gray-800 mb-2">Hours:</h4>
+                  <div className="text-sm text-gray-600 space-y-1">
                     {Object.entries(hours).map(([day, time]) => (
                       <div key={day} className="flex justify-between">
                         <span className="capitalize">{day}:</span>
@@ -90,6 +76,27 @@ export default function DealersGrid({ dealers }: DealersGridProps) {
                   </div>
                 </div>
               )}
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                {dealer.metadata?.phone_number && (
+                  <a
+                    href={`tel:${dealer.metadata.phone_number}`}
+                    className="bg-harley-orange text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors text-center"
+                  >
+                    Call Now
+                  </a>
+                )}
+                {dealer.metadata?.website && (
+                  <a
+                    href={`https://${dealer.metadata.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-harley-orange text-harley-orange px-4 py-2 rounded-lg text-sm font-medium hover:bg-harley-orange hover:text-white transition-colors text-center"
+                  >
+                    Visit Website
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         )
