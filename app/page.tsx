@@ -4,6 +4,7 @@ import ProductCategories from '@/components/ProductCategories'
 import LatestNews from '@/components/LatestNews'
 import DealerLocator from '@/components/DealerLocator'
 import CurrentPromotions from '@/components/CurrentPromotions'
+import WarrantySection from '@/components/WarrantySection'
 
 export default function HomePage() {
   return (
@@ -12,6 +13,7 @@ export default function HomePage() {
       <FeaturedMotorcycles />
       <ProductCategories />
       <CurrentPromotions />
+      <WarrantySection />
       <LatestNews />
       <DealerLocator />
     </>
