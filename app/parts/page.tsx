@@ -1,35 +1,36 @@
-import { getParts } from '@/lib/cosmic'
 import PartsGrid from '@/components/PartsGrid'
+import { getParts } from '@/lib/cosmic'
 
 export const metadata = {
-  title: 'Parts & Accessories | Harley-Davidson',
-  description: 'Genuine Harley-Davidson parts and accessories. Find engine parts, exhaust systems, wheels, lighting, seats, handlebars, and storage solutions.',
+  title: 'Parts & Accessories | Harley-Davidson Dealership',
+  description: 'Shop genuine Harley-Davidson parts and accessories for your motorcycle.'
 }
 
 export default async function PartsPage() {
-  const parts = await getParts(20)
+  let parts
+  
+  try {
+    parts = await getParts(50)
+  } catch (error) {
+    console.error('Error fetching parts:', error)
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <h1 className="text-4xl font-bold text-center mb-8">Parts & Accessories</h1>
+        <p className="text-center text-gray-600">Unable to load parts at this time.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <div className="bg-harley-gray text-white section-padding">
-        <div className="container-max">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Parts & Accessories
-          </h1>
-          <p className="text-xl text-gray-300 max-w-2xl">
-            Genuine Harley-Davidson parts and accessories to customize, maintain, 
-            and enhance your motorcycle experience.
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-16">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">Parts & Accessories</h1>
+        <p className="text-xl text-gray-600">
+          Genuine Harley-Davidson parts and accessories
+        </p>
       </div>
-
-      {/* Parts Grid */}
-      <div className="section-padding">
-        <div className="container-max">
-          <PartsGrid parts={parts} />
-        </div>
-      </div>
+      
+      <PartsGrid parts={parts} />
     </div>
   )
 }

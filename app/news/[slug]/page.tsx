@@ -1,42 +1,54 @@
 // app/news/[slug]/page.tsx
-import { getNewsArticle, getNews } from '@/lib/cosmic'
 import { notFound } from 'next/navigation'
 import NewsDetail from '@/components/NewsDetail'
+import { getNewsArticle } from '@/lib/cosmic'
 
-interface PageProps {
+interface NewsPageProps {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  const news = await getNews(50)
-  return news.map((article) => ({
-    slug: article.slug,
-  }))
-}
-
-export async function generateMetadata({ params }: PageProps) {
+export default async function NewsPage({ params }: NewsPageProps) {
   const { slug } = await params
-  const article = await getNewsArticle(slug)
-
-  if (!article) {
-    return {
-      title: 'Article Not Found | Harley-Davidson News',
-    }
+  
+  let news
+  
+  try {
+    news = await getNewsArticle(slug)
+  } catch (error) {
+    console.error('Error fetching news article:', error)
+    notFound()
   }
-
-  return {
-    title: `${article.metadata.headline} | Harley-Davidson News`,
-    description: article.metadata.summary,
-  }
-}
-
-export default async function NewsArticlePage({ params }: PageProps) {
-  const { slug } = await params
-  const article = await getNewsArticle(slug)
-
-  if (!article) {
+  
+  if (!news) {
     notFound()
   }
 
-  return <NewsDetail article={article} />
+  return (
+    <div className="container mx-auto px-4 py-16">
+      <NewsDetail news={news} />
+    </div>
+  )
+}
+
+export async function generateMetadata({ params }: NewsPageProps) {
+  const { slug } = await params
+  
+  try {
+    const news = await getNewsArticle(slug)
+    
+    if (!news) {
+      return {
+        title: 'News Article Not Found',
+      }
+    }
+
+    return {
+      title: `${news.metadata?.headline || news.title} | Harley-Davidson Dealership`,
+      description: news.metadata?.summary || undefined,
+    }
+  } catch (error) {
+    return {
+      title: 'News Article Not Found',
+    }
+  }
 }

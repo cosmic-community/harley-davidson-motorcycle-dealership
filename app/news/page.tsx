@@ -1,35 +1,36 @@
-import { getNews } from '@/lib/cosmic'
 import NewsGrid from '@/components/NewsGrid'
+import { getNews } from '@/lib/cosmic'
 
 export const metadata = {
-  title: 'News | Harley-Davidson',
-  description: 'Latest news and updates from Harley-Davidson including product announcements, events, and company news.',
+  title: 'News | Harley-Davidson Dealership',
+  description: 'Stay up to date with the latest Harley-Davidson news, product announcements, and events.'
 }
 
 export default async function NewsPage() {
-  const news = await getNews(20)
+  let news
+  
+  try {
+    news = await getNews(50)
+  } catch (error) {
+    console.error('Error fetching news:', error)
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <h1 className="text-4xl font-bold text-center mb-8">Latest News</h1>
+        <p className="text-center text-gray-600">Unable to load news at this time.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <div className="bg-harley-gray text-white section-padding">
-        <div className="container-max">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            News
-          </h1>
-          <p className="text-xl text-gray-300 max-w-2xl">
-            Stay up to date with the latest news, product announcements, and events 
-            from Harley-Davidson.
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-16">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">Latest News</h1>
+        <p className="text-xl text-gray-600">
+          Stay up to date with the latest Harley-Davidson news and updates
+        </p>
       </div>
-
-      {/* News Grid */}
-      <div className="section-padding">
-        <div className="container-max">
-          <NewsGrid news={news} />
-        </div>
-      </div>
+      
+      <NewsGrid news={news} />
     </div>
   )
 }
