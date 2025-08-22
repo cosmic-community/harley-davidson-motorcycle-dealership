@@ -5,18 +5,25 @@ export default async function DealersPage() {
   const dealers = await getDealers()
 
   return (
-    <div className="min-h-screen pt-24">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-harley-black mb-4">
-            Find a Dealer
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <div className="bg-harley-black text-white py-20">
+        <div className="container-max">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            Find Your Local Dealer
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Locate your nearest Harley-Davidson dealer for sales, service, and parts
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl">
+            Connect with authorized Harley-Davidson dealers for expert service, 
+            genuine parts, and your next motorcycle purchase.
           </p>
         </div>
+      </div>
 
-        <DealersGrid dealers={dealers} />
+      {/* Dealers Grid */}
+      <div className="section-padding">
+        <div className="container-max">
+          <DealersGrid dealers={dealers} />
+        </div>
       </div>
     </div>
   )
